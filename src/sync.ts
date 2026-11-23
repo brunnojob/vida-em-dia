@@ -68,10 +68,10 @@ export function useDataSync() {
   useEffect(() => {
     if (!supabase) return;
     let active=true;
-    void supabase.auth.getUser().then(({data:{user},error}) => {
+    void supabase.auth.getSession().then(({data:{session},error}) => {
       if (!active) return;
       if (error) { setStatus('Falha de autenticação. Recarregue.'); return }
-      if (account.current !== (user?.id ?? null) || !ready) void load(user);
+      if (account.current !== (session?.user.id ?? null) || !ready) void load(session?.user ?? null);
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event,session) => {
       if (!active || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') return;
