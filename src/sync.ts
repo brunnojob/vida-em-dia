@@ -2,20 +2,24 @@
 import { createClient, type User } from '@supabase/supabase-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type Category = 'task' | 'meal' | 'event' | 'service' | 'trip' | 'medical' | 'run';
-export type Item = { id: string; kind: Category; title: string; date: string; time: string; detail: string; cost: number; done: boolean; distanceKm?: number; durationMin?: number };
+export type Category = 'task' | 'meal' | 'event' | 'service' | 'trip' | 'medical' | 'run' | 'bill' | 'foodlog' | 'exercise';
+export type Item = { id: string; kind: Category; title: string; date: string; time: string; detail: string; cost: number; done: boolean; distanceKm?: number; durationMin?: number; kcal?: number; dueDay?: number; last4?: string; paidMonth?: string };
 export type Settings = { name: string; mealTimes: string[]; weeklyBudget: number };
 export type Data = { version: 1; items: Item[]; settings: Settings };
 export const storageKey = 'vida-em-dia-v1';
 export const defaultData: Data = { version: 1, items: [], settings: { name: '', mealTimes: ['07:30','12:30','19:30'], weeklyBudget: 500 } };
-const kinds = ['task','meal','event','service','trip','medical','run'];
+const kinds = ['task','meal','event','service','trip','medical','run','bill','foodlog','exercise'];
 export function validData(x: unknown): x is Data {
   if (!x || typeof x !== 'object') return false;
   const v = x as Partial<Data>;
   return v.version === 1 && Array.isArray(v.items) && v.items.length <= 10000 && v.items.every(i =>
     i && typeof i.id === 'string' && kinds.includes(i.kind) && typeof i.title === 'string' && typeof i.date === 'string' && typeof i.time === 'string' && typeof i.detail === 'string' && typeof i.cost === 'number' && Number.isFinite(i.cost) && typeof i.done === 'boolean' &&
     (i.distanceKm === undefined || (typeof i.distanceKm === 'number' && Number.isFinite(i.distanceKm) && i.distanceKm > 0)) &&
-    (i.durationMin === undefined || (typeof i.durationMin === 'number' && Number.isFinite(i.durationMin) && i.durationMin > 0))) &&
+    (i.durationMin === undefined || (typeof i.durationMin === 'number' && Number.isFinite(i.durationMin) && i.durationMin > 0)) &&
+    (i.kcal === undefined || (typeof i.kcal === 'number' && Number.isFinite(i.kcal) && i.kcal >= 0 && i.kcal <= 100000)) &&
+    (i.dueDay === undefined || (Number.isInteger(i.dueDay) && i.dueDay >= 1 && i.dueDay <= 31)) &&
+    (i.last4 === undefined || (typeof i.last4 === 'string' && /^\d{0,4}$/.test(i.last4))) &&
+    (i.paidMonth === undefined || (typeof i.paidMonth === 'string' && /^\d{4}-\d{2}$/.test(i.paidMonth)))) &&
     !!v.settings && typeof v.settings.name === 'string' && Array.isArray(v.settings.mealTimes) && v.settings.mealTimes.every(t => typeof t === 'string') && typeof v.settings.weeklyBudget === 'number' && Number.isFinite(v.settings.weeklyBudget);
 }
 function readLocal(): Data { try { const value=JSON.parse(localStorage.getItem(storageKey) || 'null'); return validData(value) ? value : defaultData } catch { return defaultData } }

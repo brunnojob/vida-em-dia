@@ -5,3 +5,7 @@
 .auth-form label { display: grid; gap: 6px; }
 .auth-form button { width: 100%; }
 button:disabled { opacity: .55; cursor: not-allowed; }
+.mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 18px 15px 24px; padding: 4px; border: 1px solid rgba(255,255,255,.15); border-radius: 12px; background: rgba(255,255,255,.05); }
+.mode-toggle button { border: 0; background: transparent; color: #b9c7c2; border-radius: 8px; padding: 10px 4px; font-size: 12px; cursor: pointer; }
+.mode-toggle button.active { background: #e0ebdc; color: #173b31; font-weight: 700; }
+.item-meta .text-btn { font-size: 12px; padding: 0; }
